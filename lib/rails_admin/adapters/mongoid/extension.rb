@@ -11,7 +11,7 @@ module RailsAdmin
             def rails_admin(&block)
               RailsAdmin.config(self, &block)
             end
-            alias_method_chain :accepts_nested_attributes_for, :rails_admin
+           prepend MongoidNestedAttributes
           end
         end
 
@@ -27,16 +27,16 @@ module RailsAdmin
           end
         end
 
-        module ClassMethods
+        module MongoidNestedAttributes
           # Mongoid accepts_nested_attributes_for does not store options in accessible scope,
           # so we intercept the call and store it in instance variable which can be accessed from outside
-          def accepts_nested_attributes_for_with_rails_admin(*args)
+          def accepts_nested_attributes_for(*args)
             options = args.extract_options!
             args.each do |arg|
               nested_attributes_options[arg.to_sym] = options.reverse_merge(allow_destroy: false, update_only: false)
             end
             args << options
-            accepts_nested_attributes_for_without_rails_admin(*args)
+            super(*args)
           end
         end
       end
